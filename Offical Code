@@ -1,0 +1,124 @@
+import os
+import re
+from hashlib import md5, sha256
+
+class FileScanTool:
+    def __init__(self):
+        self.malware_signatures = {
+            "virus": ["pattern1", "pattern2"],
+            "worms": ["pattern3", "pattern4"],
+            "trojans": ["pattern5", "pattern6"],
+            "ransomware": ["pattern7", "pattern8"],
+            "spyware": ["pattern9", "pattern10"],
+            "rootkits": ["pattern11", "pattern12"],
+            "zombies": ["pattern13", "pattern14"],
+            "botnets": ["pattern15", "pattern16"],
+            "phishing attacks": ["pattern17", "pattern18"],
+            "backdoors": ["pattern19", "pattern20"],
+            "logic bombs": ["pattern21", "pattern22"]
+        }
+        self.malware_types = {  # Not currently used effectively
+            "viruses": ["virus", "boot sector virus", "macro virus", "multi-partite virus", "encrypted virus", "program virus", "polymorphic virus", "metamorphic virus", "stealth virus", "armored virus", "hoax virus"],
+            "worms": ["worms"],
+            "trojans": ["trojans"],
+            "ransomware": ["ransomware"],
+            "spyware": ["spyware", "bloatware"],
+            "rootkits": ["rootkits"],
+            "zombies": ["zombies"],
+            "botnets": ["botnets"],
+            "phishing attacks": ["phishing attacks"],
+            "backdoors": ["backdoors"]
+        }
+        self.malicious_hashes = {
+            "sha256": {"malware1": "hash1", "malware2": "hash2"},
+            "md5": {"malware3": "hash3", "malware4": "hash4"}
+        }
+        self.keyloggers = ["keylogger pattern 1", "keylogger pattern 2"]
+        self.software_keyloggers = ["software keylogger pattern 1", "software keylogger pattern 2"]
+        self.hardware_keyloggers = ["hardware keylogger pattern 1", "hardware keylogger pattern 2"]
+        # ... (other pattern lists)
+
+    def scan_file(self, file_path):
+        """Scan a single file for malware."""
+        try:
+            with open(file_path, "rb") as f:
+                file_content = f.read()  # Read the file content only once
+                hash_values = {
+                    "sha256": sha256(file_content).hexdigest(),
+                    "md5": md5(file_content).hexdigest()
+                }
+
+                detected_malware = []
+
+                for malware_type, patterns in self.malware_signatures.items():
+                    if any(re.search(pattern.encode(), file_content) for pattern in patterns):  # Encode patterns
+                        detected_malware.append(malware_type)
+
+                for hash_type, hashes in self.malicious_hashes.items():
+                    if hash_values[hash_type] in hashes.values():
+                        detected_malware.append(list(self.malicious_hashes[hash_type].keys())[
+                                                    list(self.malicious_hashes[hash_type].values()).index(
+                                                        hash_values[hash_type])])  # Return the name of the malware
+
+                return detected_malware
+
+        except FileNotFoundError:
+            print(f"Error: File not found: {file_path}")
+            return []
+        except Exception as e:
+            print(f"Error scanning {file_path}: {str(e)}")
+            return []
+
+    def scan_directory(self, directory_path):
+        """Scan a directory and its contents for malware."""
+        detected_malware = {}
+        if not os.path.exists(directory_path):
+            print(f"Error: Directory not found: {directory_path}")
+            return detected_malware
+
+        for root, _, files in os.walk(directory_path):
+            for file in files:
+                file_path = os.path.join(root, file)
+                detected_types = self.scan_file(file_path)
+                if detected_types:
+                    detected_malware[file_path] = detected_types
+        return detected_malware
+
+
+    def scan_keyloggers(self, file_path):
+        """Scan a single file for keyloggers."""
+        try:
+            with open(file_path, "rb") as f:
+                file_content = f.read()
+
+                for pattern in self.keyloggers + self.software_keyloggers + self.hardware_keyloggers:
+                    if re.search(pattern.encode(), file_content):  # Encode the pattern
+                        return True
+                return False  # Return False if no keylogger pattern is found
+
+        except FileNotFoundError:
+            print(f"Error: File not found: {file_path}")
+            return False
+        except Exception as e:
+            print(f"Error scanning {file_path} for keyloggers: {str(e)}")
+            return False
+
+
+# Example usage:
+scanner = FileScanTool()
+#result = scanner.scan_file("test.txt") # Replace with your file path
+#print(result)
+#result = scanner.scan_directory("test_dir") # Replace with your directory path
+#print(result)
+#result = scanner.scan_keyloggers("test.txt")
+#print(result)
+
+class Antivirus:
+    def scan_file_for_malware(self, file_to_scan):
+        pass
+
+
+if __name__ == "__main__":
+    antivirus = Antivirus()
+    file_to_scan = input("Type file directory here:").strip('"')
+    print(antivirus.scan_file_for_malware(file_to_scan))
